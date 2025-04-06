@@ -583,13 +583,14 @@ static void prvAddNewTaskToReadyList( TCB_t *pxNewTCB ) PRIVILEGED_FUNCTION;
 
 #if( configSUPPORT_STATIC_ALLOCATION == 1 )
 
-	TaskHandle_t xTaskCreateStatic(	TaskFunction_t pxTaskCode,
-									const char * const pcName,
-									const uint32_t ulStackDepth,
-									void * const pvParameters,
-									UBaseType_t uxPriority,
-									StackType_t * const puxStackBuffer,
-									StaticTask_t * const pxTaskBuffer ) /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+	TaskHandle_t xTaskCreateStatic(	TaskFunction_t pxTaskCode,	// 任务函数指针
+									const char * const pcName,	// 任务名字
+									const uint32_t ulStackDepth,	// 任务栈深度(单位word=4byte)
+									void * const pvParameters,		// 任务参数
+									UBaseType_t uxPriority,		// 任务优先级
+									StackType_t * const puxStackBuffer,	// 任务栈指针
+									StaticTask_t * const pxTaskBuffer 	// 任务控制块指针
+								) /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
 	{
 	TCB_t *pxNewTCB;
 	TaskHandle_t xReturn;
@@ -804,8 +805,8 @@ UBaseType_t x;
 	by the port. */
 	#if( portSTACK_GROWTH < 0 )
 	{
-		pxTopOfStack = pxNewTCB->pxStack + ( ulStackDepth - ( uint32_t ) 1 );
-		pxTopOfStack = ( StackType_t * ) ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack ) & ( ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) ) ); /*lint !e923 MISRA exception.  Avoiding casts between pointers and integers is not practical.  Size differences accounted for using portPOINTER_SIZE_TYPE type. */
+		pxTopOfStack = pxNewTCB->pxStack + ( ulStackDepth - ( uint32_t ) 1 ); // 获取栈顶指针
+		pxTopOfStack = ( StackType_t * ) ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack ) & ( ~( ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) ) );  // 8字节向下对齐		
 
 		/* Check the alignment of the calculated top of stack is correct. */
 		configASSERT( ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack & ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) == 0UL ) );

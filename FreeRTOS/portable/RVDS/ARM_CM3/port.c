@@ -269,19 +269,19 @@ __asm void prvStartFirstTask( void )
 	PRESERVE8
 
 	/* Use the NVIC offset register to locate the stack. */
-	ldr r0, =0xE000ED08
-	ldr r0, [r0]
-	ldr r0, [r0]
+	ldr r0, =0xE000ED08	/* R0存储0xE000ED08,这是 SCB_VTOR 寄存器的地址*/
+	ldr r0, [r0]		/*将 SCB_VTOR 内存储的值读取到R0,该值是中断向量表的初始地址，由BOOT引脚确定，如BOOT0=0，则值为0x08000000*/
+	ldr r0, [r0]		/*将中断向量表初始位置(如0x08000000)存储的值加载到R0，这是 __initial_sp 的地址，这是由编译器决定的值，表示这是程序的栈顶指针 */
 
 	/* Set the msp back to the start of the stack. */
-	msr msp, r0
+	msr msp, r0			/* 将程序的栈顶指针赋值给MSP（R13） */
 	/* Globally enable interrupts. */
-	cpsie i
-	cpsie f
+	cpsie i				/* 使能中断 */
+	cpsie f				/* 使能中断 */
 	dsb
 	isb
 	/* Call SVC to start the first task. */
-	svc 0
+	svc 0				/* 调用SVC中断服务函数 SVC_Handler(),被重定义为了 vPortSVCHandler()  */
 	nop
 	nop
 }
