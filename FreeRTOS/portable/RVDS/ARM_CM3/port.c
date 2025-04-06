@@ -251,16 +251,20 @@ __asm void vPortSVCHandler( void )
 {
 	PRESERVE8
 
-	ldr	r3, =pxCurrentTCB	/* Restore the context. */
-	ldr r1, [r3]			/* Use pxCurrentTCBConst to get the pxCurrentTCB address. */
-	ldr r0, [r1]			/* The first item in pxCurrentTCB is the task top of stack. */
-	ldmia r0!, {r4-r11}		/* Pop the registers that are not automatically saved on exception entry and the critical nesting count. */
-	msr psp, r0				/* Restore the task stack pointer. */
+	ldr	r3, =pxCurrentTCB	/* =pxCurrentTCB是存储了 pxCurrent 值的地址 */
+	ldr r1, [r3]			/* 根据地址获取 pxCurrent 的值存到R1，该值是指向当前task控制块的初始地址 */
+	ldr r0, [r1]			/* 将当前task控制块第一个成员（pxTopOfStack）加载到R0 */
+	ldmia r0!, {r4-r11}		/* R0指向了任务栈顶，依次将任务栈内的前8个字加载到R4-R11 */
+	msr psp, r0				/* 经过上述的加载后，R0已经指向了 发生异常时程序进行压栈后 的栈顶，因此该指令会让(R13)PSP指向压栈后的栈顶 */
 	isb
 	mov r0, #0
-	msr	basepri, r0
-	orr r14, #0xd
-	bx r14
+	msr	basepri, r0 /* 使能中断 */
+	orr r14, #0xd	/* 在异常状态下，R14[31:4]必须为1，[3:0]有这特殊的作用  
+						3	0=返回 Handler 模式（异常模式），1=返回线程模式（任务模式）。
+						2	0=使用 MSP（主栈指针），1=使用 PSP（进程栈指针，用于任务栈）。
+						1	保留（必须为0）。
+						0	0=返回 ARM 状态（Cortex-M 不支持），1=返回 Thumb 状态（必须为1）。 */
+	bx r14			/**  bx 指令会处罚异常返回，自动恢复R0-R3/R12/LR/PC等寄存器  \warning  必须使用bx指令触发异常返回，否则无法自动加载寄存器  */
 }
 /*-----------------------------------------------------------*/
 
