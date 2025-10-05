@@ -23,7 +23,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
-#include "FreeRTOS.h"		//FreeRTOS使用		  
+#include "FreeRTOS.h"		//FreeRTOS浣跨敤		  
 #include "task.h" 
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
@@ -135,7 +135,7 @@ extern void xPortSysTickHandler(void);
   */
 void SysTick_Handler(void)
 {
-	if(xTaskGetSchedulerState()!=taskSCHEDULER_NOT_STARTED)//系统已经运行
+	if(xTaskGetSchedulerState()!=taskSCHEDULER_NOT_STARTED)//绯荤粺宸茬粡杩愯
     {
         xPortSysTickHandler();	
     }

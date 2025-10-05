@@ -31,9 +31,12 @@ class c_struct_analyser:
 
     def __extract_a_file_c_structures(self,file_path):
         file_content = ""
-        with open(file_path,mode='r',encoding='utf-8') as file:
-            for line in file:
-                file_content += line 
+        try:
+            with open(file=file_path,mode='r',encoding='utf-8') as file:            
+                for line in file:
+                    file_content += line 
+        except UnicodeDecodeError as exc:
+            print(f'file [{file_path}] trough out exception [{exc}]')
 
         file_content = self.__remove_comment_strings(file_content)    # remove all comment strings 
 

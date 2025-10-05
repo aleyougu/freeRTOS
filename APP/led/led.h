@@ -3,7 +3,7 @@
 
 #include "system.h"
 
-/*  LEDÊ±ÖÓ¶Ë¿Ú¡¢Òı½Å¶¨Òå */
+/*  LEDæ—¶é’Ÿç«¯å£ã€å¼•è„šå®šä¹‰ */
 #define LED1_PORT 			GPIOB   
 #define LED1_PIN 			GPIO_Pin_5
 #define LED1_PORT_RCC		RCC_APB2Periph_GPIOB

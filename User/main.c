@@ -6,65 +6,65 @@
 #include "task.h"
 
 
-//ÈÎÎñÓÅÏÈ¼¶
+//ä»»åŠ¡ä¼˜å…ˆçº§
 #define START_TASK_PRIO		1
-//ÈÎÎñ¶ÑÕ»´óĞ¡	
+//ä»»åŠ¡å †æ ˆå¤§å°	
 #define START_STK_SIZE 		128  
-//ÈÎÎñ¶ÑÕ»
+//ä»»åŠ¡å †æ ˆ
 StackType_t StartTaskStack[START_STK_SIZE];
-//ÈÎÎñ¿ØÖÆ¿é
+//ä»»åŠ¡æ§åˆ¶å—
 StaticTask_t StartTaskTCB;
-//ÈÎÎñ¾ä±ú
+//ä»»åŠ¡å¥æŸ„
 TaskHandle_t StartTask_Handler;
-//ÈÎÎñº¯Êı
+//ä»»åŠ¡å‡½æ•°
 void start_task(void *pvParameters);
 
 
-//ÈÎÎñÓÅÏÈ¼¶
+//ä»»åŠ¡ä¼˜å…ˆçº§
 #define TASK1_TASK_PRIO		2
-//ÈÎÎñ¶ÑÕ»´óĞ¡	
+//ä»»åŠ¡å †æ ˆå¤§å°	
 #define TASK1_STK_SIZE 		128  
-//ÈÎÎñ¶ÑÕ»
+//ä»»åŠ¡å †æ ˆ
 StackType_t Task1TaskStack[TASK1_STK_SIZE];
-//ÈÎÎñ¿ØÖÆ¿é
+//ä»»åŠ¡æ§åˆ¶å—
 StaticTask_t Task1TaskTCB;
-//ÈÎÎñ¾ä±ú
+//ä»»åŠ¡å¥æŸ„
 TaskHandle_t Task1Task_Handler;
-//ÈÎÎñº¯Êı
+//ä»»åŠ¡å‡½æ•°
 void task1_task(void *pvParameters);
 
 
-//ÈÎÎñÓÅÏÈ¼¶
+//ä»»åŠ¡ä¼˜å…ˆçº§
 #define TASK2_TASK_PRIO		3
-//ÈÎÎñ¶ÑÕ»´óĞ¡	
+//ä»»åŠ¡å †æ ˆå¤§å°	
 #define TASK2_STK_SIZE 		128 
-//ÈÎÎñ¶ÑÕ»
+//ä»»åŠ¡å †æ ˆ
 StackType_t Task2TaskStack[TASK2_STK_SIZE];
-//ÈÎÎñ¿ØÖÆ¿é
+//ä»»åŠ¡æ§åˆ¶å—
 StaticTask_t Task2TaskTCB;
-//ÈÎÎñ¾ä±ú
+//ä»»åŠ¡å¥æŸ„
 TaskHandle_t Task2Task_Handler;
-//ÈÎÎñº¯Êı
+//ä»»åŠ¡å‡½æ•°
 void task2_task(void *pvParameters);
 
 
-/* ¿ÕÏĞÈÎÎñÈÎÎñ¶ÑÕ» */
+/* ç©ºé—²ä»»åŠ¡ä»»åŠ¡å †æ ˆ */
 static StackType_t Idle_Task_Stack[configMINIMAL_STACK_SIZE];
-/* ¶¨Ê±Æ÷ÈÎÎñ¶ÑÕ» */
+/* å®šæ—¶å™¨ä»»åŠ¡å †æ ˆ */
 static StackType_t Timer_Task_Stack[configTIMER_TASK_STACK_DEPTH];
 
-/* ¿ÕÏĞÈÎÎñ¿ØÖÆ¿é */
+/* ç©ºé—²ä»»åŠ¡æ§åˆ¶å— */
 static StaticTask_t Idle_Task_TCB;	
-/* ¶¨Ê±Æ÷ÈÎÎñ¿ØÖÆ¿é */
+/* å®šæ—¶å™¨ä»»åŠ¡æ§åˆ¶å— */
 static StaticTask_t Timer_Task_TCB;
 
-//»ñÈ¡¿ÕÏĞÈÎÎñµØÈÎÎñ¶ÑÕ»ºÍÈÎÎñ¿ØÖÆ¿éÄÚ´æ£¬ÒòÎª±¾Àı³ÌÊ¹ÓÃµÄ
-//¾²Ì¬ÄÚ´æ£¬Òò´Ë¿ÕÏĞÈÎÎñµÄÈÎÎñ¶ÑÕ»ºÍÈÎÎñ¿ØÖÆ¿éµÄÄÚ´æ¾ÍÓ¦¸Ã
-//ÓĞÓÃ»§À´Ìá¹©£¬FreeRTOSÌá¹©ÁË½Ó¿Úº¯ÊıvApplicationGetIdleTaskMemory()
-//ÊµÏÖ´Ëº¯Êı¼´¿É¡£
-//ppxIdleTaskTCBBuffer:ÈÎÎñ¿ØÖÆ¿éÄÚ´æ
-//ppxIdleTaskStackBuffer:ÈÎÎñ¶ÑÕ»ÄÚ´æ
-//pulIdleTaskStackSize:ÈÎÎñ¶ÑÕ»´óĞ¡
+//è·å–ç©ºé—²ä»»åŠ¡åœ°ä»»åŠ¡å †æ ˆå’Œä»»åŠ¡æ§åˆ¶å—å†…å­˜ï¼Œå› ä¸ºæœ¬ä¾‹ç¨‹ä½¿ç”¨çš„
+//é™æ€å†…å­˜ï¼Œå› æ­¤ç©ºé—²ä»»åŠ¡çš„ä»»åŠ¡å †æ ˆå’Œä»»åŠ¡æ§åˆ¶å—çš„å†…å­˜å°±åº”è¯¥
+//æœ‰ç”¨æˆ·æ¥æä¾›ï¼ŒFreeRTOSæä¾›äº†æ¥å£å‡½æ•°vApplicationGetIdleTaskMemory()
+//å®ç°æ­¤å‡½æ•°å³å¯ã€‚
+//ppxIdleTaskTCBBuffer:ä»»åŠ¡æ§åˆ¶å—å†…å­˜
+//ppxIdleTaskStackBuffer:ä»»åŠ¡å †æ ˆå†…å­˜
+//pulIdleTaskStackSize:ä»»åŠ¡å †æ ˆå¤§å°
 void vApplicationGetIdleTaskMemory(StaticTask_t **ppxIdleTaskTCBBuffer, 
 								   StackType_t **ppxIdleTaskStackBuffer, 
 								   uint32_t *pulIdleTaskStackSize)
@@ -74,49 +74,49 @@ void vApplicationGetIdleTaskMemory(StaticTask_t **ppxIdleTaskTCBBuffer,
 	*pulIdleTaskStackSize=configMINIMAL_STACK_SIZE;
 }
 
-//»ñÈ¡¶¨Ê±Æ÷ÈÎÎñµÄÈÎÎñ¶ÑÕ»ºÍÈÎÎñ¿ØÖÆ¿éÄÚ´æ
-//ppxTimerTaskTCBBuffer	:		ÈÎÎñ¿ØÖÆ¿éÄÚ´æ
-//ppxTimerTaskStackBuffer:	ÈÎÎñ¶ÑÕ»ÄÚ´æ
-//pulTimerTaskStackSize	:		ÈÎÎñ¶ÑÕ»´óĞ¡
+//è·å–å®šæ—¶å™¨ä»»åŠ¡çš„ä»»åŠ¡å †æ ˆå’Œä»»åŠ¡æ§åˆ¶å—å†…å­˜
+//ppxTimerTaskTCBBuffer	:		ä»»åŠ¡æ§åˆ¶å—å†…å­˜
+//ppxTimerTaskStackBuffer:	ä»»åŠ¡å †æ ˆå†…å­˜
+//pulTimerTaskStackSize	:		ä»»åŠ¡å †æ ˆå¤§å°
 void vApplicationGetTimerTaskMemory(StaticTask_t **ppxTimerTaskTCBBuffer, 
 									StackType_t **ppxTimerTaskStackBuffer, 
 									uint32_t *pulTimerTaskStackSize)
 {
-	*ppxTimerTaskTCBBuffer=&Timer_Task_TCB;/* ÈÎÎñ¿ØÖÆ¿éÄÚ´æ */
-	*ppxTimerTaskStackBuffer=Timer_Task_Stack;/* ÈÎÎñ¶ÑÕ»ÄÚ´æ */
-	*pulTimerTaskStackSize=configTIMER_TASK_STACK_DEPTH;/* ÈÎÎñ¶ÑÕ»´óĞ¡ */
+	*ppxTimerTaskTCBBuffer=&Timer_Task_TCB;/* ä»»åŠ¡æ§åˆ¶å—å†…å­˜ */
+	*ppxTimerTaskStackBuffer=Timer_Task_Stack;/* ä»»åŠ¡å †æ ˆå†…å­˜ */
+	*pulTimerTaskStackSize=configTIMER_TASK_STACK_DEPTH;/* ä»»åŠ¡å †æ ˆå¤§å° */
 }
 
 
 /*******************************************************************************
-* º¯ Êı Ãû         : main
-* º¯Êı¹¦ÄÜ		   : Ö÷º¯Êı
-* Êä    Èë         : ÎŞ
-* Êä    ³ö         : ÎŞ
+* å‡½ æ•° å         : main
+* å‡½æ•°åŠŸèƒ½		   : ä¸»å‡½æ•°
+* è¾“    å…¥         : æ— 
+* è¾“    å‡º         : æ— 
 *******************************************************************************/
 int main()
 {
 	SysTick_Init(72);
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);//ÉèÖÃÏµÍ³ÖĞ¶ÏÓÅÏÈ¼¶·Ö×é4
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);//è®¾ç½®ç³»ç»Ÿä¸­æ–­ä¼˜å…ˆçº§åˆ†ç»„4
 	LED_Init();
 	USART1_Init(115200);
 	
-	//´´½¨¿ªÊ¼ÈÎÎñ
-	StartTask_Handler=xTaskCreateStatic((TaskFunction_t	)start_task,		//ÈÎÎñº¯Êı
-										(const char* 	)"start_task",		//ÈÎÎñÃû³Æ
-										(uint32_t 		)START_STK_SIZE,	//ÈÎÎñ¶ÑÕ»´óĞ¡
-										(void* 		  	)NULL,				//´«µİ¸øÈÎÎñº¯ÊıµÄ²ÎÊı
-										(UBaseType_t 	)START_TASK_PRIO, 	//ÈÎÎñÓÅÏÈ¼¶
-										(StackType_t*   )StartTaskStack,	//ÈÎÎñ¶ÑÕ»
-										(StaticTask_t*  )&StartTaskTCB);	//ÈÎÎñ¿ØÖÆ¿é              
-    vTaskStartScheduler();          //¿ªÆôÈÎÎñµ÷¶È
+	//åˆ›å»ºå¼€å§‹ä»»åŠ¡
+	StartTask_Handler=xTaskCreateStatic((TaskFunction_t	)start_task,		//ä»»åŠ¡å‡½æ•°
+										(const char* 	)"start_task",		//ä»»åŠ¡åç§°
+										(uint32_t 		)START_STK_SIZE,	//ä»»åŠ¡å †æ ˆå¤§å°
+										(void* 		  	)NULL,				//ä¼ é€’ç»™ä»»åŠ¡å‡½æ•°çš„å‚æ•°
+										(UBaseType_t 	)START_TASK_PRIO, 	//ä»»åŠ¡ä¼˜å…ˆçº§
+										(StackType_t*   )StartTaskStack,	//ä»»åŠ¡å †æ ˆ
+										(StaticTask_t*  )&StartTaskTCB);	//ä»»åŠ¡æ§åˆ¶å—              
+    vTaskStartScheduler();          //å¼€å¯ä»»åŠ¡è°ƒåº¦
 }
 
-//¿ªÊ¼ÈÎÎñÈÎÎñº¯Êı
+//å¼€å§‹ä»»åŠ¡ä»»åŠ¡å‡½æ•°
 void start_task(void *pvParameters)
 {
-    taskENTER_CRITICAL();           //½øÈëÁÙ½çÇø
-    //´´½¨TASK1ÈÎÎñ
+    taskENTER_CRITICAL();           //è¿›å…¥ä¸´ç•ŒåŒº
+    //åˆ›å»ºTASK1ä»»åŠ¡
 	Task1Task_Handler=xTaskCreateStatic((TaskFunction_t	)task1_task,		
 										(const char* 	)"task1_task",		
 										(uint32_t 		)TASK1_STK_SIZE,	
@@ -124,7 +124,7 @@ void start_task(void *pvParameters)
 										(UBaseType_t 	)TASK1_TASK_PRIO, 	
 										(StackType_t*   )Task1TaskStack,	
 										(StaticTask_t*  )&Task1TaskTCB);	
-    //´´½¨TASK2ÈÎÎñ
+    //åˆ›å»ºTASK2ä»»åŠ¡
 	Task2Task_Handler=xTaskCreateStatic((TaskFunction_t	)task2_task,		
 										(const char* 	)"task2_task",		
 										(uint32_t 		)TASK2_STK_SIZE,	
@@ -132,11 +132,11 @@ void start_task(void *pvParameters)
 										(UBaseType_t 	)TASK2_TASK_PRIO, 	
 										(StackType_t*   )Task2TaskStack,	
 										(StaticTask_t*  )&Task2TaskTCB);
-    vTaskDelete(StartTask_Handler); //É¾³ı¿ªÊ¼ÈÎÎñ
-    taskEXIT_CRITICAL();            //ÍË³öÁÙ½çÇø
+    vTaskDelete(StartTask_Handler); //åˆ é™¤å¼€å§‹ä»»åŠ¡
+    taskEXIT_CRITICAL();            //é€€å‡ºä¸´ç•ŒåŒº
 }
 
-//ÈÎÎñ1º¯Êı
+//ä»»åŠ¡1å‡½æ•°
 void task1_task(void *pvParameters)
 {
     while(1)
@@ -148,7 +148,7 @@ void task1_task(void *pvParameters)
     }
 }
 
-//ÈÎÎñ2º¯Êı
+//ä»»åŠ¡2å‡½æ•°
 void task2_task(void *pvParameters)
 {
     while(1)
