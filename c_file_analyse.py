@@ -7,6 +7,7 @@ class c_struct_analyser:
     def __init__(self):
             self.__c_files=[]
             self.__c_structs={} # __c_structs element: struct_name:[members] 
+            self.__c_consts={}  # origin_const : replace_const
             self.__string_expd =''
 
 
@@ -22,6 +23,34 @@ class c_struct_analyser:
                      self.__list_all_files(abs_path)
                 else:
                      pass 
+    
+    def __remove_const_string(self,content_string):
+        content_string = re.sub(r'\\\n',' ',content_string)
+        # print(content_string)
+        const_pattern = [
+            r'typedef[\s\w]+?;',r'#define[\s\w]+?\n' ]
+        for pattern in const_pattern:
+            for def_string in re.findall(pattern=pattern,string=content_string):
+                content_string = re.sub(def_string,'',content_string) 
+                if const_pattern.index(pattern) == 0:
+                    re_res = re.findall(r'typedef([\s\w]+?)(\w+)\s*;',def_string)[0] 
+                    if len(re_res) >= 2 :
+                        if re_res[1] not in self.__c_consts.keys():
+                            self.__c_consts[re_res[1]] = re.sub(pattern=r'\s+',repl=' ',string=str(re_res[0])) 
+                        else:
+                            print(f'const string [{re_res[1]}] found multiple times, ignore it ')
+                        # content_string = re.sub(pattern=re_res[1],repl=re_res[0],string=content_string)
+                elif const_pattern.index(pattern) == 1:
+                    re_res=re.findall(r'#define\s+(\w+)?([\s\w]+)\n',def_string)[0]
+                    if len(re_res) >= 2:
+                        if re_res[0] not in self.__c_consts.keys():
+                            self.__c_consts[re_res[0]] = re.sub(pattern=r'\s+',repl=' ',string=str(re_res[1]))
+                        else:
+                            print(f'const string [{re_res[0]}] found multiple times, ignore it ')
+                        # content_string = re.sub(pattern=re_res[0],repl=re_res[1],string=content_string)
+        for key in self.__c_consts.keys():
+            content_string=re.sub(pattern=key,repl=self.__c_consts[key],string=content_string)    
+        return content_string
     
     def __remove_comment_strings(self,file_strings):
         patterns=( r'/\*[\s\S]*?\*/', r'//.*\n')
@@ -39,7 +68,8 @@ class c_struct_analyser:
             print(f'file [{file_path}] trough out exception [{exc}]')
 
         file_content = self.__remove_comment_strings(file_content)    # remove all comment strings 
-
+        file_content = self.__remove_const_string(file_content)
+        
         c_struct_pattern=[  (r'struct\s+(\w+)\s*\{([\s\S]*?)\}\s*;'             ,0),
                             (r'typedef\s+struct\s*\{([\s\S]*?)\}\s*(\w+)\s*;'   ,1)
                          ]
