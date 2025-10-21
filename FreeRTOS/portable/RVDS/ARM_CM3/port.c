@@ -251,7 +251,7 @@ __asm void vPortSVCHandler( void )
 {
 	PRESERVE8
 
-	ldr	r3, =pxCurrentTCB	/* =pxCurrentTCB是存储了 pxCurrent 值的地址 */
+	ldr	r3, =pxCurrentTCB	/* =pxCurrentTCB是存储了 pxCurrent标识符的地址 */
 	ldr r1, [r3]			/* 根据地址获取 pxCurrent 的值存到R1，该值是指向当前task控制块的初始地址 */
 	ldr r0, [r1]			/* 将当前task控制块第一个成员（pxTopOfStack）加载到R0 */
 	ldmia r0!, {r4-r11}		/* R0指向了任务栈顶，依次将任务栈内的前8个字加载到R4-R11 */
@@ -271,21 +271,16 @@ __asm void vPortSVCHandler( void )
 __asm void prvStartFirstTask( void )
 {
 	PRESERVE8
-
-	/* Use the NVIC offset register to locate the stack. */
-	ldr r0, =0xE000ED08	/* R0存储0xE000ED08,这是 SCB_VTOR 寄存器的地址*/
-	ldr r0, [r0]		/*将 SCB_VTOR 内存储的值读取到R0,该值是中断向量表的初始地址，由BOOT引脚确定，如BOOT0=0，则值为0x08000000*/
-	ldr r0, [r0]		/*将中断向量表初始位置(如0x08000000)存储的值加载到R0，这是 __initial_sp 的地址，这是由编译器决定的值，表示这是程序的栈顶指针 */
-
-	/* Set the msp back to the start of the stack. */
-	msr msp, r0			/* 将程序的栈顶指针赋值给MSP（R13） */
-	/* Globally enable interrupts. */
-	cpsie i				/* 使能中断 */
-	cpsie f				/* 使能中断 */
+	PRESERVE8
+	ldr r0, =0xE000ED08	  // R0 = SCB_VTOR  register address
+	ldr r0, [r0]		      // R0 = SCB_VTOR value, the start address of vector table
+	ldr r0, [r0]		      // R0 = the first value of the vector table, which stored the initial_SP value
+	msr msp, r0			      // MSP = initial_SP
+	cpsie i				        // Enable interrupts and configurable fault handlers (clear PRIMASK)
+	cpsie f				        // Enable interrupts and fault handlers (clear FAULTMASK)
 	dsb
 	isb
-	/* Call SVC to start the first task. */
-	svc 0				/* 调用SVC中断服务函数 SVC_Handler(),被重定义为了 vPortSVCHandler()  */
+	svc 0				        // trigger an SVC handler, CPU state ==> privileged handler mode
 	nop
 	nop
 }
