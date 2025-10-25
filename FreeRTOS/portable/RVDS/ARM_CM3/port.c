@@ -271,11 +271,11 @@ __asm void vPortSVCHandler( void )
 __asm void prvStartFirstTask( void )
 {
 	PRESERVE8
-	PRESERVE8
-	ldr r0, =0xE000ED08	  // R0 = SCB_VTOR  register address
-	ldr r0, [r0]		      // R0 = SCB_VTOR value, the start address of vector table
-	ldr r0, [r0]		      // R0 = the first value of the vector table, which stored the initial_SP value
-	msr msp, r0			      // MSP = initial_SP
+
+	ldr r0, =0xE000ED08	  		// R0 = SCB_VTOR  register address
+	ldr r0, [r0]		      	// R0 = SCB_VTOR value, the start address of vector table
+	ldr r0, [r0]		      	// R0 = the first value of the vector table, which stored the initial_SP value
+	msr msp, r0			   		// MSP = initial_SP
 	cpsie i				        // Enable interrupts and configurable fault handlers (clear PRIMASK)
 	cpsie f				        // Enable interrupts and fault handlers (clear FAULTMASK)
 	dsb
@@ -401,21 +401,22 @@ __asm void xPortPendSVHandler( void )
 	mrs r0, psp
 	isb
 
-	ldr	r3, =pxCurrentTCB		/* Get the location of the current TCB. */
-	ldr	r2, [r3]
+	ldr	r3, =pxCurrentTCB		/* Get the address of pxCurrentTCB. */
+	ldr	r2, [r3]						/* Get the value of pxCurrentTCB */
 
-	stmdb r0!, {r4-r11}			/* Save the remaining registers. */
-	str r0, [r2]				/* Save the new top of stack into the first member of the TCB. */
+	stmdb r0!, {r4-r11}			/* Store R11-R4 to the stack of pxCurrentTCB, R11 is saved first in high address position. */
+	str r0, [r2]						/* Save the pxTopOfStack value of pxCurrentTCB to R0. */
 
-	stmdb sp!, {r3, r14}
-	mov r0, #configMAX_SYSCALL_INTERRUPT_PRIORITY
-	msr basepri, r0
+	stmdb sp!, {r3, r14}		/* store R14(exception return value) and R3(address of pxCurrentTCB) to main stack(when in exception mode, main stack in used as sp) */
+	mov r0, #configMAX_SYSCALL_INTERRUPT_PRIORITY	
+	msr basepri, r0	/* Disable system interrup */
 	dsb
 	isb
-	bl vTaskSwitchContext
+	bl vTaskSwitchContext	/* execute the vTaskSwitchContext() function: look for the highest prio task in ready list, and 
+													 assign the first task TCB to  pxCurrentTCB*/ 
 	mov r0, #0
-	msr basepri, r0
-	ldmia sp!, {r3, r14}
+	msr basepri, r0				/* enabled system interrupt */
+	ldmia sp!, {r3, r14}	
 
 	ldr r1, [r3]
 	ldr r0, [r1]				/* The first item in pxCurrentTCB is the task top of stack. */
